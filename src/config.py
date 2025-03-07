@@ -1,0 +1,5 @@
+MODEL_NAME = "llama3.2"
+EMBEDDING_MODEL = "nomic-embed-text"
+COLLECTION_NAME = "simple-rag"
+PDF_PATH = "./data/doc3.pdf"
+VECTOR_DB_PATH = "./data/vector_store"
