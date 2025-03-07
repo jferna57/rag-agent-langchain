@@ -18,6 +18,7 @@ pikepdf = "*"
 sentence-transformers = "*"
 elevenlabs = "*"
 langchain-chroma = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

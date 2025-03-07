@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "89ca2fbb085c08b9718727f848c81b48c71617a2c67860c9c09905b889826cbd"
+            "sha256": "222c124908b461b0da9946ec65d32399caed92b89598b2c980977e28bddc9f65"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -1391,11 +1391,11 @@
         },
         "langsmith": {
             "hashes": [
-                "sha256:045b49d0401d0e985d025ff0cf69743ab9a429e309ce5d533eab3c774d004bc2",
-                "sha256:cf7926bd12d56adbd74a294ebbfc5a34c413172bfbdcd763175cc472b45afbea"
+                "sha256:14014058cff408772acb93344e03cb64174837292d5f1ae09b2c8c1d8df45e92",
+                "sha256:73aaf52bbc293b9415fff4f6dad68df40658081eb26c9cb2c7bd1ff57cedd695"
             ],
             "markers": "python_version >= '3.9' and python_version < '4.0'",
-            "version": "==0.3.12"
+            "version": "==0.3.13"
         },
         "loguru": {
             "hashes": [
@@ -2999,6 +2999,7 @@
                 "sha256:e324ee90a023d808f1959c46bcbc04446a10ced277783dc6ee09987c37ec10ca",
                 "sha256:f7b63ef50f1b690dddf550d03497b66d609393b40b564ed0d674909a68ebf16a"
             ],
+            "index": "pypi",
             "markers": "python_version >= '3.8'",
             "version": "==1.0.1"
         },

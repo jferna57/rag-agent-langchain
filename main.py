@@ -1,4 +1,7 @@
 import time
+from dotenv import load_dotenv
+import os
+
 from src.config import *
 from src.ingestion import load_pdf
 from src.chunking import split_text
@@ -11,6 +14,9 @@ from src.prompt_template import get_query_prompt
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
+
+# Cargar las variables de entorno desde el archivo .env
+load_dotenv()
 
 if __name__ == '__main__':
     steps_times = {}
