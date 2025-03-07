@@ -1,4 +1,4 @@
-# Proyecto de Procesamiento de Documentos PDF
+# Procesamiento de Documentos PDF con Langchain y Ollama
 
 Este proyecto permite cargar documentos PDF, dividirlos en fragmentos, almacenarlos en una base de datos vectorial, cargar un modelo de lenguaje para realizar consultas sobre el contenido del documento y registrar los tiempos de cada paso del procesamiento.
 
