@@ -80,8 +80,8 @@ if __name__ == '__main__':
     # Ejecución de una consulta de ejemplo 2
     start_time = time.time()
     result = chain.invoke(input=("¿Quien es el autor del documento?",))
-    steps_times["7. Ejecutar consulta - autor"] = end_time - start_time
     end_time = time.time()
+    steps_times["7. Ejecutar consulta - autor"] = end_time - start_time
     print("Respuesta: ", result)
     
     # Mostrar resumen de tiempos
