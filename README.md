@@ -21,27 +21,35 @@ Los tiempos de ejecución para cada uno de estos pasos se registran y se present
 
 - **Lenguaje de Programación**: Python
 - **Frameworks y Librerías**:
+
   - LangChain: para manejar los prompts y la cadena de procesamiento.
   - Chroma: para la base de datos vectorial.
   - `time`: para medir el tiempo de ejecución de cada paso.
 
 - **Modelos de Lenguaje**:
   - Se utiliza un modelo LLM para la ejecución de consultas sobre el documento.
-  
+
 ## Instalación
 
 Para instalar y ejecutar este proyecto en tu máquina local, sigue estos pasos:
+
 1. Instalar los modelos de ollama siguientes:
 
 ```bash
     ollama pull llama3.2
     ollama pull nomic-embed-text
 ```
+
 2. Ejecutar los siguientes comandos
+
 ```bash
+    python -m venv .venv
+    source .venv/bin/activate
+    pip install --user pipenv
+
     git clone https://github.com/jferna57/rag-agent-langchain
     cd rag-agent-langchain
-    pip install --user pipenv
+
     pipenv install
     pipenv shell
     python main.py

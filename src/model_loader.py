@@ -23,8 +23,8 @@ def load_llm():
     """
     try:
         llm = ChatOllama(model=MODEL_NAME)
-        print("Modelo LLM cargado correctamente")
+        print(f"Modelo LLM {MODEL_NAME} cargado correctamente")
         return llm
     except Exception as e:
-        print(f"Error cargando el modelo LLM: {e}")
+        print(f"Error cargando el modelo LLM {MODEL_NAME} : {e}")
         return None
