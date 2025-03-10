@@ -51,7 +51,7 @@ if __name__ == '__main__':
     if not llm:
         exit(1)
     end_time = time.time()
-    steps_times["4. Cargar modelo LLM"] = end_time - start_time
+    steps_times["4. Cargar modelo LLM : " + os.getenv("MODEL_NAME")] = end_time - start_time
 
     # Configuración del sistema de recuperación
     start_time = time.time()
@@ -81,6 +81,7 @@ if __name__ == '__main__':
     start_time = time.time()
     result = chain.invoke(input=("¿Quien es el autor del documento?",))
     steps_times["7. Ejecutar consulta - autor"] = end_time - start_time
+    end_time = time.time()
     print("Respuesta: ", result)
     
     # Mostrar resumen de tiempos
