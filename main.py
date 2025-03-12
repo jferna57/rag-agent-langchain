@@ -1,11 +1,11 @@
-import time
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
+import socket
 
-from src.config import *
+from src.data import save_data, DataPayload, SystemInfo, ModelInfo, PerformanceData, QuestionAnswerPair
 from src.ingestion import load_pdf
 from src.chunking import split_text
-from src.performance import log_times
+from src.performance import log_times, timed_execution
 from src.vector_db import setup_vector_db
 from src.model_loader import load_llm
 from src.retrieval import setup_retriever
@@ -15,55 +15,72 @@ from langchain.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
-# Cargar las variables de entorno desde el archivo .env
-load_dotenv()
+from src.utils import obtener_info_equipo
 
-if __name__ == '__main__':
+from typing import List
+
+def main():
+    """Función principal para ejecutar el flujo de procesamiento."""
+    system_info : SystemInfo = obtener_info_equipo()
+
+    # Cargar el archivo .env
+    load_dotenv(override=True)
+
+    PDF_FILE = os.getenv("PDF_FILE")
+    VECTOR_DB_PATH = os.getenv("VECTOR_DB_PATH")
+    EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
+    COLLECTION_NAME = os.getenv("COLLECTION_NAME")
+    MODEL_NAME = os.getenv("MODEL_NAME")
+    
+    # Imprime las variables de entorno
+    print(f"PDF_FILE: {PDF_FILE}")
+    print(f"VECTOR_DB_PATH: {VECTOR_DB_PATH}")
+    print(f"EMBEDDING_MODEL: {EMBEDDING_MODEL}")
+    print(f"COLLECTION_NAME: {COLLECTION_NAME}")
+    print(f"MODEL_NAME: {MODEL_NAME}")
+    
     steps_times = {}
-    
-    # Carga del PDF
-    start_time = time.time()
-    documents = load_pdf(PDF_PATH)
+    questions_and_answers = []  # Lista para almacenar las preguntas y respuestas
+
+
+    # 1. Cargar PDF
+    documents, elapsed = timed_execution(load_pdf, PDF_FILE)
     if not documents:
-        exit(1)
-    end_time = time.time()
-    steps_times["1. Cargar PDF"] = end_time - start_time
-    
-    # División en fragmentos
-    start_time = time.time()
-    chunks = split_text(documents)
+        print("Error al cargar el PDF.")
+        return
+    steps_times["Cargar PDF"] = elapsed
+
+    # 2. Dividir texto
+    chunks, elapsed = timed_execution(split_text, documents)
     if not chunks:
-        exit(1)
-    end_time = time.time()
-    steps_times["2. Dividir texto"] = end_time - start_time
-    
-    # Configuración de la base de datos vectorial
-    start_time = time.time()
-    vector_db = setup_vector_db(chunks, EMBEDDING_MODEL, COLLECTION_NAME)
+        print("Error al dividir el texto.")
+        return
+    steps_times["Dividir texto"] = elapsed
+
+    # 3. Configurar base de datos vectorial
+    vector_db, elapsed = timed_execution(setup_vector_db, VECTOR_DB_PATH, chunks, EMBEDDING_MODEL, COLLECTION_NAME)
     if not vector_db:
-        exit(1)
-    end_time = time.time()
-    steps_times["3. Configurar base de datos vectorial"] = end_time - start_time
+        print("Error al configurar la base de datos vectorial.")
+        return
+    steps_times["Configurar base de datos vectorial"] = elapsed
 
-    # Carga del modelo LLM
-    start_time = time.time()
-    llm = load_llm()
+    # 4. Cargar modelo LLM
+    
+    llm, elapsed = timed_execution(load_llm, MODEL_NAME)
     if not llm:
-        exit(1)
-    end_time = time.time()
-    steps_times["4. Cargar modelo LLM : " + os.getenv("MODEL_NAME")] = end_time - start_time
+        print(f"Error al cargar el modelo LLM: {MODEL_NAME}")
+        return
+    steps_times[f"Cargar modelo LLM"] = elapsed
 
-    # Configuración del sistema de recuperación
-    start_time = time.time()
+    # 5. Configurar sistema de recuperación
     query_prompt = get_query_prompt()
-    retriever = setup_retriever(vector_db, llm, query_prompt)
+    retriever, elapsed = timed_execution(setup_retriever, vector_db, llm, query_prompt)
     if not retriever:
-        exit(1)
-    end_time = time.time()
-    steps_times["5. Configurar sistema de recuperación"] = end_time - start_time
+        print("Error al configurar el sistema de recuperación.")
+        return
+    steps_times["Configurar sistema retriever"] = elapsed
 
-    # Ejecución de una consulta de ejemplo
-    start_time = time.time()
+    # 6. Ejecutar consulta - Resumen
     template = ChatPromptTemplate.from_template("Answer the question based ONLY on the following context: {context}\nQuestion: {question}")
     chain = (
         {"context": retriever, "question": RunnablePassthrough()}
@@ -71,18 +88,49 @@ if __name__ == '__main__':
         | llm
         | StrOutputParser()
     )
+    question_1 = "Genera un resumen del documento"
+    result_1, elapsed = timed_execution(chain.invoke, input=(question_1,))
+    steps_times["Ejecutar consulta Resumen"] = elapsed
+    print("Respuesta: ", result_1)
+    
+    # Guardar la pregunta y la respuesta
+    questions_and_answers.append({"question": question_1, "answer": result_1})
 
-    result = chain.invoke(input=("¿De qué trata el documento?",))
-    end_time = time.time()
-    steps_times["6. Ejecutar consulta - Resumen"] = end_time - start_time
-    print("Respuesta: ", result)
-
-    # Ejecución de una consulta de ejemplo 2
-    start_time = time.time()
-    result = chain.invoke(input=("¿Quien es el autor del documento?",))
-    end_time = time.time()
-    steps_times["7. Ejecutar consulta - autor"] = end_time - start_time
-    print("Respuesta: ", result)
+    # 7. Ejecutar consulta - autor
+    question_2 = "Dime el titulo del documento"
+    result_2, elapsed = timed_execution(chain.invoke, input=(question_2,))
+    steps_times["Ejecutar consulta autor"] = elapsed
+    print("Respuesta: ", result_2)
+        # Guardar la pregunta y la respuesta
+    questions_and_answers.append({"question": question_2, "answer": result_2})
     
     # Mostrar resumen de tiempos
-    log_times(steps_times)
+    times_json = log_times(steps_times)
+
+    # Create ModelInfo object
+    model_info_obj = ModelInfo(
+        model_name=MODEL_NAME,
+        embedding_model=EMBEDDING_MODEL
+    )
+
+    # Create PerformanceData object
+    performance_data_obj = PerformanceData(
+        steps_times=times_json
+    )
+
+    # Create QuestionAnswerPair objects
+    question_answer_pairs: List[QuestionAnswerPair] = [QuestionAnswerPair(question=qa["question"], answer=qa["answer"]) for qa in questions_and_answers]
+    
+    # Create DataPayload object
+    data_payload = DataPayload(
+        server_name=socket.gethostname(),
+        timestamp="",
+        server_data=system_info,
+        performance_data=performance_data_obj,
+        model_info=model_info_obj,
+        questions_and_answers=question_answer_pairs
+    )
+    save_data(data_payload)
+
+if __name__ == '__main__':
+    main()

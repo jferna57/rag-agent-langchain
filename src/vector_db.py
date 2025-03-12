@@ -2,18 +2,17 @@ import os
 import ollama
 from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
-from src.config import VECTOR_DB_PATH
 
-def vector_db_exists() -> bool:
+def vector_db_exists(vector_db_path) -> bool:
     """
     Verifica si la base de datos vectorial ya existe en el directorio especificado.
 
     Retorna:
         bool: True si la base de datos existe, False en caso contrario.
     """
-    return os.path.exists(VECTOR_DB_PATH)
+    return os.path.exists(vector_db_path)
 
-def setup_vector_db(chunks, embedding_model, collection_name):
+def setup_vector_db(vector_db_path, chunks, embedding_model, collection_name):
     """
     Configura una base de datos vectorial utilizando Chroma y OllamaEmbeddings.
 
@@ -29,12 +28,12 @@ def setup_vector_db(chunks, embedding_model, collection_name):
         None: Si ocurre un error durante la configuración.
     """
     # Verifica si la base de datos ya existe
-    if vector_db_exists():
+    if vector_db_exists(vector_db_path):
         print("La base de datos ya existe. Cargando la base de datos existente...")
         try:
             # Carga la base de datos existente
             vector_db = Chroma(
-                persist_directory=VECTOR_DB_PATH, 
+                persist_directory=vector_db_path, 
                 embedding_function=OllamaEmbeddings(model=embedding_model),
                 collection_name=collection_name
             )
@@ -51,7 +50,7 @@ def setup_vector_db(chunks, embedding_model, collection_name):
                 documents=chunks,
                 embedding=OllamaEmbeddings(model=embedding_model),
                 collection_name=collection_name,
-                persist_directory=VECTOR_DB_PATH  # Especifica el directorio de persistencia
+                persist_directory=vector_db_path  # Especifica el directorio de persistencia
             )
             print("Base de datos vectorial configurada correctamente")
             return vector_db

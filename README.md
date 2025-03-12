@@ -22,9 +22,9 @@ Los tiempos de ejecución para cada uno de estos pasos se registran y se present
 - **Lenguaje de Programación**: Python
 - **Frameworks y Librerías**:
 
+  - Ollama: cliente de modelos de IA generativa.
   - LangChain: para manejar los prompts y la cadena de procesamiento.
   - Chroma: para la base de datos vectorial.
-  - `time`: para medir el tiempo de ejecución de cada paso.
 
 - **Modelos de Lenguaje**:
   - Se utiliza un modelo LLM para la ejecución de consultas sobre el documento.
@@ -33,24 +33,32 @@ Los tiempos de ejecución para cada uno de estos pasos se registran y se present
 
 Para instalar y ejecutar este proyecto en tu máquina local, sigue estos pasos:
 
-1. Instalar los modelos de ollama siguientes:
+- Instalar los modelos de ollama siguientes:
 
 ```bash
     ollama pull llama3.2
     ollama pull nomic-embed-text
 ```
 
-2. Ejecutar los siguientes comandos
+- Descargar el código fuente
 
 ```bash
-    python -m venv .venv
-    source .venv/bin/activate
-    pip install --user pipenv
+  git clone https://github.com/jferna57/rag-agent-langchain
+  cd rag-agent-langchain
+```
 
-    git clone https://github.com/jferna57/rag-agent-langchain
-    cd rag-agent-langchain
+- Crear entorno python y instalar las dependencias
 
-    pipenv install
-    pipenv shell
-    python main.py
+```bash
+  python -m venv .venv
+  source .venv/bin/activate
+```
+
+- Instalar las dependencias de la aplicación:
+
+```bash
+  pip install --user pipenv
+  pipenv install
+  pipenv shell
+  python main.py
 ```

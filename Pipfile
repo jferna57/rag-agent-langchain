@@ -19,6 +19,10 @@ sentence-transformers = "*"
 elevenlabs = "*"
 langchain-chroma = "*"
 python-dotenv = "*"
+gputil = "*"
+torch = "*"
+psutil = "*"
+firebase-admin = "*"
 
 [dev-packages]
 

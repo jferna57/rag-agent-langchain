@@ -23,7 +23,7 @@ def setup_retriever(vector_db, llm, query_prompt):
     Ejemplo de uso:
     retriever = setup_retriever(vector_db, llm, query_prompt)
     """
-    try:
+    try: 
         retriever = MultiQueryRetriever.from_llm(
             vector_db.as_retriever(), llm, prompt=query_prompt
         )

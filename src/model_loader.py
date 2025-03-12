@@ -1,7 +1,6 @@
 from langchain_ollama import ChatOllama
-from src.config import MODEL_NAME
 
-def load_llm():
+def load_llm(model_name:str):
     """
     Carga un modelo de lenguaje (LLM) utilizando Ollama.
 
@@ -22,9 +21,9 @@ def load_llm():
     llm = load_llm()
     """
     try:
-        llm = ChatOllama(model=MODEL_NAME)
-        print(f"Modelo LLM {MODEL_NAME} cargado correctamente")
+        llm = ChatOllama(model=model_name)
+        print(f"Modelo LLM {model_name} cargado correctamente")
         return llm
     except Exception as e:
-        print(f"Error cargando el modelo LLM {MODEL_NAME} : {e}")
+        print(f"Error cargando el modelo LLM {model_name} : {e}")
         return None
