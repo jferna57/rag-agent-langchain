@@ -1,3 +1,8 @@
+"""_summary_
+
+Returns:
+    _type_: _description_
+"""
 import subprocess
 import platform
 import psutil
@@ -37,7 +42,7 @@ def obtener_info_gpu():
                 check=True
             )
             if result.returncode == 0:
-                return {"numero_gpus": 1, "nombres": ["Apple Silicon GPU"]} #simplificado, se puede extraer más información.
+                return {"numero_gpus": 1, "nombres": ["Apple Silicon GPU"]}
         else:  # NVIDIA (asume que está instalado nvidia-smi)
             result = subprocess.run(
                 ['nvidia-smi',

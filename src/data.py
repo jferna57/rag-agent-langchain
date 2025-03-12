@@ -1,3 +1,10 @@
+"""
+src/data.py
+
+This module defines data structures (dataclasses) and functions for interacting with
+Firebase Realtime Database. It provides a way to serialize and save structured
+data, including system information, model details, and question-answer pairs.
+"""
 import dataclasses
 import os
 

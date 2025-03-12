@@ -16,12 +16,12 @@ def load_pdf(file_path: str):
     try:
         loader = UnstructuredPDFLoader(file_path=file_path)
         data = loader.load()
-        logging.info(f"PDF {file_path} cargado correctamente")
+        logging.info("PDF %s cargado correctamente", file_path)
         return data
     except FileNotFoundError:
-        logging.error(f"El archivo {file_path} no fue encontrado.")
+        logging.error("El archivo %s no fue encontrado.", file_path)
     except ImportError as e:
-        logging.error(f"Biblioteca faltante: {e}")
+        logging.error("Biblioteca faltante: %s", e)
     except Exception as e:
-        logging.error(f"Error cargando el PDF: {e}")
+        logging.error("Error cargando el PDF: %s", e)
     return None
