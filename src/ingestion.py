@@ -1,4 +1,7 @@
+import logging
+
 from langchain_community.document_loaders import UnstructuredPDFLoader
+
 
 def load_pdf(file_path: str):
     """
@@ -13,12 +16,12 @@ def load_pdf(file_path: str):
     try:
         loader = UnstructuredPDFLoader(file_path=file_path)
         data = loader.load()
-        print("PDF cargado correctamente")
+        logging.info(f"PDF {file_path} cargado correctamente")
         return data
     except FileNotFoundError:
-        print("El archivo no fue encontrado.")
+        logging.error(f"El archivo {file_path} no fue encontrado.")
     except ImportError as e:
-        print(f"Biblioteca faltante: {e}")
+        logging.error(f"Biblioteca faltante: {e}")
     except Exception as e:
-        print(f"Error cargando el PDF: {e}")
+        logging.error(f"Error cargando el PDF: {e}")
     return None

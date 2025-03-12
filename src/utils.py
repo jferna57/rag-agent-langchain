@@ -1,12 +1,20 @@
-import platform
 import sys
-import psutil
 import subprocess
-from src.data import SystemInfo, QuestionAnswerPair, ModelInfo, PerformanceData, DataPayload
+import platform
 from typing import Dict
+import psutil
+
+from src.data import SystemInfo
 
 
 def obtener_info_equipo() -> SystemInfo:
+    """
+    Obtiene información detallada del equipo y la devuelve en un objeto SystemInfo.
+
+    Returns:
+        SystemInfo: Un objeto que contiene la información del sistema.
+
+    """
     # Detectar el sistema operativo y arquitectura
     sistema = platform.system()
     arquitectura = platform.machine()
@@ -17,7 +25,7 @@ def obtener_info_equipo() -> SystemInfo:
         "Libre": round(psutil.disk_usage('/').free / (1024**3), 2)
     }
 
-    system_info = SystemInfo(
+    info_equipo = SystemInfo(
         operating_system=f"{sistema} {platform.release()}",
         version=platform.version(),
         architecture=arquitectura,
@@ -32,8 +40,8 @@ def obtener_info_equipo() -> SystemInfo:
         #torch_available=torch_disponible(),
         #cuda_available=torch_cuda_disponible()
     )
-    
-    return system_info
+
+    return info_equipo
 
 def obtener_gpu():
     """Detects the presence of the GPU, especially for macOS M1."""
@@ -80,4 +88,3 @@ def torch_cuda_disponible():
 if __name__ == "__main__":
     system_info = obtener_info_equipo()
     print(system_info)
-

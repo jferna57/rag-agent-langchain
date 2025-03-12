@@ -1,4 +1,7 @@
+import logging
+
 from langchain.retrievers.multi_query import MultiQueryRetriever
+
 
 def setup_retriever(vector_db, llm, query_prompt):
     """
@@ -27,8 +30,8 @@ def setup_retriever(vector_db, llm, query_prompt):
         retriever = MultiQueryRetriever.from_llm(
             vector_db.as_retriever(), llm, prompt=query_prompt
         )
-        print("Sistema de recuperación configurado correctamente")
+        logging.info("Sistema de recuperación configurado correctamente")
         return retriever
     except Exception as e:
-        print(f"Error configurando el sistema de recuperación: {e}")
+        logging.error("Error configurando el sistema de recuperación: %s", e)
         return None

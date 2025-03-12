@@ -1,4 +1,7 @@
+import logging
+
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+
 
 def split_text(documents, chunk_size=1200, chunk_overlap=300):
     """
@@ -30,8 +33,8 @@ def split_text(documents, chunk_size=1200, chunk_overlap=300):
             chunk_size=chunk_size, chunk_overlap=chunk_overlap
         )
         chunks = text_splitter.split_documents(documents)
-        print(f"Documento dividido en {len(chunks)} fragmentos")
+        logging.info("Documento dividido en %d fragmentos", len(chunks))
         return chunks
-    except Exception as e:
-        print(f"Error dividiendo el texto: {e}")
+    except (ValueError, TypeError) as e:
+        logging.error("Error dividiendo el texto: %s", e)
         return None

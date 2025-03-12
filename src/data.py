@@ -1,11 +1,12 @@
+import dataclasses
 import os
+
 from datetime import datetime
 
 from typing import Dict, List
 
 import firebase_admin
 from firebase_admin import credentials, db
-import dataclasses
 
 # Initialize Firebase Admin SDK (only once)
 cred = credentials.Certificate(os.getenv("FIREBASE_CREDENTIALS_PATH"))
@@ -34,19 +35,11 @@ class ModelInfo:
     model_name: str
     embedding_model: str
 
-
-@dataclasses.dataclass
-class PerformanceData:
-    """Represents performance data for different steps."""
-    steps_times: Dict[str, float]
-
-
 @dataclasses.dataclass
 class QuestionAnswerPair:
     """Represents a question and its corresponding answer."""
     question: str
     answer: str
-
 
 @dataclasses.dataclass
 class DataPayload:
@@ -54,10 +47,9 @@ class DataPayload:
     server_name: str
     timestamp: str
     server_data: SystemInfo
-    performance_data: PerformanceData
+    performance_data: Dict[str, float]
     model_info: ModelInfo
-    questions_and_answers: List[QuestionAnswerPair]
-
+    questions_and_answers: List[Dict[str, str]]
 
 def serialize_data_payload(data_payload: DataPayload) -> Dict:
     """
@@ -79,15 +71,13 @@ def serialize_data_payload(data_payload: DataPayload) -> Dict:
             "gpu": data_payload.server_data.gpu,
             "gpu_count": data_payload.server_data.gpu_count,
         },
-        "performance_data": {
-            "steps_times": data_payload.performance_data.steps_times
-        },
+        "performance_data": data_payload.performance_data.steps_times,
         "model_info": {
             "model_name": data_payload.model_info.model_name,
             "embedding_model": data_payload.model_info.embedding_model
         },
         "questions_and_answers": [
-            {"question": qa.question, "answer": qa.answer}
+            {"question": qa["question"], "answer": qa["answer"]}  # Access as dictionary keys
             for qa in data_payload.questions_and_answers
         ]
     }
@@ -102,7 +92,7 @@ def save_data(data_payload: DataPayload):
     """
     try:
         now = datetime.now()
-        timestamp_str = now.strftime("%Y%m%d%H%M%S%f")  # Format: YYYYMMDDHHMMSSmmm (for milliseconds)
+        timestamp_str = now.strftime("%Y%m%d%H%M%S%f") 
         timestamp_human = now.strftime("%Y-%m-%d %H:%M:%S")
         data_payload.timestamp = timestamp_human
 
@@ -117,6 +107,5 @@ def save_data(data_payload: DataPayload):
 
         print(f"Data sent successfully to Firebase at /{data_payload.server_name}")
 
-    except Exception as e:
+    except (Exception) as e:
         print(f"An error occurred while saving data to Firebase: {e}")
-

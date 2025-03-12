@@ -1,59 +1,47 @@
-import os
+import logging
+from typing import List
+
+import chromadb
 import ollama
-from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
+from langchain_core.documents import Document
+from langchain_ollama import OllamaEmbeddings
 
-def vector_db_exists(vector_db_path) -> bool:
+
+def setup_vector_db(chunks: List[Document], embedding_model: str, collection_name: str):
     """
-    Verifica si la base de datos vectorial ya existe en el directorio especificado.
+    Configures a vector database using Chroma and OllamaEmbeddings, storing it in memory.
 
-    Retorna:
-        bool: True si la base de datos existe, False en caso contrario.
+    This function creates a new vector database in memory.
+
+    Args:
+        chunks (List[Document]): List of document chunks.
+        embedding_model (str): Name of the Ollama model for generating embeddings.
+        collection_name (str): Name of the collection in the vector database.
+
+    Returns:
+        Chroma: Instance of the configured vector database.
+        None: If an error occurs during configuration.
     """
-    return os.path.exists(vector_db_path)
+    try:
+        # Download the embedding model from Ollama
+        ollama.pull(embedding_model)
 
-def setup_vector_db(vector_db_path, chunks, embedding_model, collection_name):
-    """
-    Configura una base de datos vectorial utilizando Chroma y OllamaEmbeddings.
-
-    Si la base de datos ya existe, se carga; de lo contrario, se crea una nueva.
-
-    Parámetros:
-        chunks (list): Lista de documentos fragmentados.
-        embedding_model (str): Nombre del modelo de Ollama para generar embeddings.
-        collection_name (str): Nombre de la colección en la base de datos vectorial.
-
-    Retorna:
-        Chroma: Instancia de la base de datos vectorial configurada.
-        None: Si ocurre un error durante la configuración.
-    """
-    # Verifica si la base de datos ya existe
-    if vector_db_exists(vector_db_path):
-        print("La base de datos ya existe. Cargando la base de datos existente...")
-        try:
-            # Carga la base de datos existente
-            vector_db = Chroma(
-                persist_directory=vector_db_path, 
-                embedding_function=OllamaEmbeddings(model=embedding_model),
-                collection_name=collection_name
-            )
-            return vector_db
-        except Exception as e:
-            print(f"Error al cargar la base de datos existente: {e}")
-            return None
-    else:
-        try:
-            # Descarga el modelo de embeddings de Ollama
-            ollama.pull(embedding_model)
-            # Crea una nueva base de datos y añade los documentos
-            vector_db = Chroma.from_documents(
-                documents=chunks,
-                embedding=OllamaEmbeddings(model=embedding_model),
-                collection_name=collection_name,
-                persist_directory=vector_db_path  # Especifica el directorio de persistencia
-            )
-            print("Base de datos vectorial configurada correctamente")
-            return vector_db
-        except Exception as e:
-            print(f"Error configurando la base de datos vectorial: {e}")
-            return None
+        # disable chromadb telemetry
+        chromadb_config_settings = chromadb.config.Settings(
+            is_persistent=False,
+            anonymized_telemetry=False,
+        )
+        # Create a new database in memory and add the documents
+        vector_db = Chroma.from_documents(
+            client_settings=chromadb_config_settings,
+            documents=chunks,
+            embedding=OllamaEmbeddings(model=embedding_model),
+            collection_name=collection_name,
+            persist_directory=None  # No persistent directory
+        )
+        logging.info("Vector database configured correctly (in memory)")
+        return vector_db
+    except Exception as e:
+        logging.error(f"Error configuring the vector database: {e}")
+        return None

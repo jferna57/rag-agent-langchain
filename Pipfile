@@ -5,9 +5,7 @@ name = "pypi"
 
 [packages]
 ollama = "*"
-chromadb = "*"
 pdfplumber = "*"
-langchain = "*"
 langchain-core = "*"
 langchain-ollama = "*"
 langchain-community = "*"
@@ -23,8 +21,11 @@ gputil = "*"
 torch = "*"
 psutil = "*"
 firebase-admin = "*"
+chromadb = "*"
+langchain = "*"
 
 [dev-packages]
+pylint = "*"
 
 [requires]
 python_version = "3.11"

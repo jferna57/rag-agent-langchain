@@ -1,3 +1,5 @@
+import logging
+
 from langchain_ollama import ChatOllama
 
 def load_llm(model_name:str):
@@ -22,8 +24,8 @@ def load_llm(model_name:str):
     """
     try:
         llm = ChatOllama(model=model_name)
-        print(f"Modelo LLM {model_name} cargado correctamente")
+        logging.info("Modelo LLM %s cargado correctamente", model_name)
         return llm
     except Exception as e:
-        print(f"Error cargando el modelo LLM {model_name} : {e}")
+        logging.error("Error cargando el modelo LLM %s : %s", model_name, e)
         return None
