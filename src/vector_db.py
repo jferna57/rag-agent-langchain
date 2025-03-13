@@ -1,18 +1,16 @@
 import logging
 from typing import List
 
-import chromadb
 import ollama
-from langchain_chroma import Chroma
 from langchain_core.documents import Document
 from langchain_ollama import OllamaEmbeddings
+from langchain_community.vectorstores import FAISS
 
-
-def setup_vector_db(chunks: List[Document], embedding_model: str, collection_name: str):
+def setup_vector_db(chunks: List[Document], embedding_model: str):
     """
-    Configures a vector database using Chroma and OllamaEmbeddings, storing it in memory.
+    Configures a vector database using FAISS and OllamaEmbeddings, storing it in memory.
 
-    This function creates a new vector database in memory.
+    This function creates a new FAISS vector database in memory.
 
     Args:
         chunks (List[Document]): List of document chunks.
@@ -20,30 +18,22 @@ def setup_vector_db(chunks: List[Document], embedding_model: str, collection_nam
         collection_name (str): Name of the collection in the vector database.
 
     Returns:
-        Chroma: Instance of the configured vector database.
+        FAISS: Instance of the configured vector database.
         None: If an error occurs during configuration.
     """
     try:
         # Download the embedding model from Ollama
         ollama.pull(embedding_model)
 
-        # disable chromadb telemetry
-        chromadb_config_settings = chromadb.config.Settings(
-            is_persistent=False,
-            anonymized_telemetry=False,
-            persist_directory=None,
-            allow_reset=True,
-        )
-        # Create a new database in memory and add the documents
-        vector_db = Chroma.from_documents(
-            client_settings=chromadb_config_settings,
-            documents=chunks,
-            embedding=OllamaEmbeddings(model=embedding_model),
-            collection_name=collection_name,
-        )
-        logging.info("Vector database configured correctly (in memory)")
+        # Create embeddings using Ollama
+        embeddings = OllamaEmbeddings(model=embedding_model)
+
+        # Create a FAISS vector store from the document chunks
+        vector_db = FAISS.from_documents(documents=chunks, embedding=embeddings)
+
+        logging.info("FAISS vector database configured correctly (in memory)")
         return vector_db
+
     except Exception as e:
-        logging.error("Error configuring the vector database: %s", e)
+        logging.error("Error configuring the FAISS vector database: %s", e)
         return None
- 

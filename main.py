@@ -9,7 +9,6 @@ from typing import Callable, Dict, List, Optional
 
 from dotenv import load_dotenv
 from langchain.prompts import ChatPromptTemplate
-from langchain_chroma import Chroma
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 
@@ -65,7 +64,7 @@ def timed_function(func: Callable) -> Callable:
     return wrapper
 
 @timed_function
-def load_and_split_pdf(pdf_file: str, chunk_size: int, chunk_overlap: int) -> List[str]:
+def step_1_load_and_split_pdf(pdf_file: str, chunk_size: int, chunk_overlap: int) -> List[str]:
     """Loads a PDF and splits it into chunks."""
     logging.info("Loading and splitting PDF: %s", pdf_file)
 
@@ -89,7 +88,7 @@ def load_and_split_pdf(pdf_file: str, chunk_size: int, chunk_overlap: int) -> Li
     return chunks
 
 @timed_function
-def setup_vector_database(chunks: List, embedding_model: str, collection_name: str) -> Chroma:
+def step_2_setup_vector_database(chunks: List, embedding_model: str, collection_name: str):
     """Sets up the vector database."""
     logging.info("Setting up vector database...")
     if not isinstance(chunks, list):
@@ -99,13 +98,13 @@ def setup_vector_database(chunks: List, embedding_model: str, collection_name: s
     if not isinstance(collection_name, str):
         raise ValueError("collection_name must be a string")
     
-    vector_db = setup_vector_db (chunks, embedding_model, collection_name)
+    vector_db = setup_vector_db (chunks, embedding_model)
     if not vector_db:
         raise ProcessingError("Error setting up vector database.")
     return vector_db
 
 @timed_function
-def load_language_model(model_name: str):
+def step_3_load_language_model(model_name: str):
     """Loads the language model."""
     logging.info("Loading language model: %s", model_name)
     if not isinstance(model_name, str):
@@ -116,7 +115,7 @@ def load_language_model(model_name: str):
     return llm
 
 @timed_function
-def setup_retrieval_system(vector_db, llm):
+def step_4_setup_retrieval_system(vector_db, llm):
     """Sets up the retrieval system."""
     logging.info("Setting up retrieval system...")
     if vector_db is None:
@@ -129,7 +128,6 @@ def setup_retrieval_system(vector_db, llm):
         raise ProcessingError("Error setting up retrieval system.")
     return retriever
 
-@timed_function
 def execute_llm_query(retriever, llm, question: str) -> Dict:
     """Executes a query and returns the result and elapsed time."""
     logging.info('Executing query: %s', question)
@@ -168,7 +166,8 @@ def load_config():
 
     return pdf_file, embedding_model, collection_name, model_name
 
-def process_queries(retriever, llm) -> List[Dict]:
+@timed_function
+def step_5_process_queries(retriever, llm) -> List[Dict]:
     """Processes the queries and returns the results."""
     query_results = [
         execute_llm_query(retriever, llm, "Genera un resumen del documento"),
@@ -212,11 +211,11 @@ def main():
         system_info: SystemInfo = obtener_info_equipo()
         pdf_file, embedding_model, collection_name, model_name = load_config()
 
-        chunks = load_and_split_pdf(pdf_file, DEFAULT_CHUNK_SIZE, DEFAULT_CHUNK_OVERLAP)
-        vector_db = setup_vector_database(chunks, embedding_model, collection_name)
-        llm = load_language_model(model_name)
-        retriever = setup_retrieval_system(vector_db, llm)
-        questions_and_answers = process_queries(retriever, llm)
+        chunks = step_1_load_and_split_pdf(pdf_file, DEFAULT_CHUNK_SIZE, DEFAULT_CHUNK_OVERLAP)
+        vector_db = step_2_setup_vector_database(chunks, embedding_model, collection_name)
+        llm = step_3_load_language_model(model_name)
+        retriever = step_4_setup_retrieval_system(vector_db, llm)
+        questions_and_answers = step_5_process_queries(retriever, llm)
         data_payload = create_data_payload(
             system_info,
             model_name,
