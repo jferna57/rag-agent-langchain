@@ -31,6 +31,8 @@ def setup_vector_db(chunks: List[Document], embedding_model: str, collection_nam
         chromadb_config_settings = chromadb.config.Settings(
             is_persistent=False,
             anonymized_telemetry=False,
+            persist_directory=None,
+            allow_reset=True,
         )
         # Create a new database in memory and add the documents
         vector_db = Chroma.from_documents(
@@ -38,10 +40,10 @@ def setup_vector_db(chunks: List[Document], embedding_model: str, collection_nam
             documents=chunks,
             embedding=OllamaEmbeddings(model=embedding_model),
             collection_name=collection_name,
-            persist_directory=None  # No persistent directory
         )
         logging.info("Vector database configured correctly (in memory)")
         return vector_db
     except Exception as e:
-        logging.error(f"Error configuring the vector database: {e}")
+        logging.error("Error configuring the vector database: %s", e)
         return None
+ 
